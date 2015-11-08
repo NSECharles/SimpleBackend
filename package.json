@@ -1,0 +1,44 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "eslintConfig": {
+    "env": {
+      "mocha": true,
+      "node": true,
+      "browser": true
+    },
+    "extends": "eslint:recommended",
+    "ecmaFeatures": 
+    {
+      "arrowFunctions" : true
+    },
+    "rules": {
+      "quotes": 0,
+      "no-trailing-spaces": 0,
+      "no-multi-spaces": 0,
+      "space-infix-ops": 0,
+      "space-unary-ops": 0,
+      "semi-spacing": 0,
+      "comma-spacing": 0,
+      "no-underscore-dangle": 0,
+      "key-spacing": 0,
+      "eol-last": 0,
+      "comma-dangle": 0,
+      "no-mixed-spaces-and-tabs": 0,
+      "no-process-exit": 0,
+      "no-console": 0
+    }
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "mongodb": "^2.0.47"
+  }
+}
