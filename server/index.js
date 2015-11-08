@@ -96,10 +96,10 @@ app.post( '/players/:playerId/buyPotion', ( req, res ) =>
 	{
 		if ( playerData )
 		{
-			if ( playerData.Coins >= 50 )
+			if ( playerData.Coins >= 50 && playerData.Health > 0 )
 			{
 				playerData.Coins -= 50;
-				playerData.Health += 100;
+				playerData.Health = 100;
 			}
 
 			dbSetPlayerData( req.params.playerId, playerData, ( err  ) =>
@@ -121,7 +121,7 @@ app.post( '/players/:playerId/fight', ( req, res ) =>
 			{
 				playerData.Kills++;
 				playerData.Coins += Math.ceil( Math.random() * 5 );
-				playerData.Health -= Math.ceil( Math.random() * 10 );
+				playerData.Health -= Math.ceil( Math.random() * 11 );
 			}
 
 			dbSetPlayerData( req.params.playerId, playerData, ( err  ) =>

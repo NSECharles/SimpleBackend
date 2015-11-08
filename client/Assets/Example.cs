@@ -18,7 +18,9 @@ public class Example : MonoBehaviour
 	
 	void OnGUI()
 	{
-		GUI.Label( new Rect( 20, 20, 400, 50), "PlayerId: " + _PlayerId );
+		GUI.skin.label.fontSize = GUI.skin.box.fontSize = GUI.skin.button.fontSize = 28;
+		
+		GUI.Label( new Rect( 20, 20, 640, 50), "_id: " + _PlayerId );
 		
 		HelloButtonGUI();	
 		NewPlayerButtonGUI();
