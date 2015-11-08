@@ -6,9 +6,7 @@ using UnityEngine;
 
 public class Rester : MonoBehaviour
 {
-	public bool ShouldLog;
-	
-	
+
 	public void PostJSON( string inURL, JsonObject inJSON, Action< string, JsonObject > inCallback )
 	{
 		var headers = new Dictionary< string, string >();
@@ -22,10 +20,7 @@ public class Rester : MonoBehaviour
 				JsonObject obj = null;
 				if ( string.IsNullOrEmpty( inError ) && ! string.IsNullOrEmpty( inWWW.text ) )
 				{
-					if ( ShouldLog )
-					{
-						Debug.Log("Response: " + inWWW.text );
-					}
+					Debug.Log("Response: " + inWWW.text );
 										
 					object parsedObj = null;
 					if ( SimpleJson.SimpleJson.TryDeserializeObject( inWWW.text, out parsedObj ) )
@@ -54,10 +49,7 @@ public class Rester : MonoBehaviour
 				JsonObject obj = null;
 				if ( string.IsNullOrEmpty( inError ) && ! string.IsNullOrEmpty( inWWW.text ) )
 				{
-					if ( ShouldLog )
-					{
-						Debug.Log("Response: " + inWWW.text );
-					}
+					Debug.Log("Response: " + inWWW.text );
 										
 					object parsedObj = null;
 					if ( SimpleJson.SimpleJson.TryDeserializeObject( inWWW.text, out parsedObj ) )
@@ -95,7 +87,7 @@ public class Rester : MonoBehaviour
 		//Debug.Log ("Do PostRequest");
 		if( Application.internetReachability != NetworkReachability.NotReachable || inWWWFactory.IsLocal )
 		{
-			www = inWWWFactory.GetWWW( ShouldLog );
+			www = inWWWFactory.GetWWW( );
 			yield return www;
 			
 			if( !www.isDone )
@@ -161,12 +153,9 @@ public class Rester : MonoBehaviour
 			_Headers = inHeaders;
 		}
 
-		public WWW GetWWW( bool inShouldLogRequests )
+		public WWW GetWWW( )
 		{
-			if( inShouldLogRequests )
-			{
-				Debug.Log( "Request: " + _URL );
-			}
+			Debug.Log( "Request: " + _URL );
 			return new WWW( _URL, _Data, _Headers );
 		}
 
