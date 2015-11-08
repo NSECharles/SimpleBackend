@@ -2,10 +2,7 @@
 
 // EXPRESS INIT / HELLO WORLD
 var express = require( 'express');
-var bodyParser = require( 'body-parser');
-
 var app = express();
-
 
 app.get( '/hello', function( req,res ) 
 {
@@ -20,6 +17,8 @@ app.get( '/hello', function( req,res )
 /// MONGO INIT
 var mongodb = require( 'mongodb');
 var mongo = mongodb.MongoClient;
+var ObjectID = mongodb.ObjectID;
+
 var db;
 mongo.connect( 'mongodb://localhost:27017/test', ( err, inDB ) =>
 {
@@ -30,7 +29,6 @@ mongo.connect( 'mongodb://localhost:27017/test', ( err, inDB ) =>
 	}
 
 	db = inDB;
-
 	app.listen( process.env.PORT || 3000 );	
 } );
 
@@ -43,7 +41,8 @@ app.post( '/players', ( req, res ) =>
 	{
 		Name : "player" + Math.ceil( Math.random() * 10000 ),
 		Health: 100,
-		Coins: 200
+		Coins: 80,
+		Kills: 0
 	};
 
 	players.insertOne( newPlayer, ( err, result ) =>
@@ -63,24 +62,72 @@ app.post( '/players', ( req, res ) =>
 	} );
 });
 
-app.get( '/players/:playerId', ( req, res ) => 
+function dbGetPlayerData( playerId, callback )
 {
 	var players = db.collection( 'players');
-	players.findOne( req.playerId, ( err, result ) =>
+	console.log( playerId );
+	players.findOne( { _id: ObjectID.createFromHexString( playerId ) }, callback );
+}
+
+function dbSetPlayerData( playerId, playerData, callback )
+{
+	var players = db.collection( 'players');
+	players.update( { _id: ObjectID.createFromHexString( playerId ) }, playerData, callback );
+}
+
+// LOAD PLAYER DATA
+app.get( '/players/:playerId', ( req, res ) => 
+{
+	console.log( req.params.playerId );
+	dbGetPlayerData( req.params.playerId, ( err, playerData ) =>
 	{
-		if( err )
-		{
-			console.error( err );
-			return res.status( 500 ).send( err );
-		}
-		else
+		if ( playerData )
 		{
 			console.log( "found player with id: " + req.playerId );
-			return res.send( result );
+			return res.send( playerData );
 		}
 	} );
 });
 
+// BUY POTION
+app.post( '/players/:playerId/buyPotion', ( req, res ) => 
+{
+	dbGetPlayerData( req.params.playerId, ( err, playerData ) =>
+	{
+		if ( playerData )
+		{
+			if ( playerData.Coins >= 50 )
+			{
+				playerData.Coins -= 50;
+				playerData.Health += 100;
+			}
 
-// parse application/json
-app.use(bodyParser.json());
+			dbSetPlayerData( req.params.playerId, playerData, ( err  ) =>
+			{
+				return res.send( playerData );
+			} );
+		}
+	} );
+});
+
+// FIGHT
+app.post( '/players/:playerId/fight', ( req, res ) => 
+{
+	dbGetPlayerData( req.params.playerId, ( err, playerData ) =>
+	{
+		if ( playerData )
+		{
+			if ( playerData.Health > 0 )
+			{
+				playerData.Kills++;
+				playerData.Coins += Math.ceil( Math.random() * 5 );
+				playerData.Health -= Math.ceil( Math.random() * 10 );
+			}
+
+			dbSetPlayerData( req.params.playerId, playerData, ( err  ) =>
+			{
+				return res.send( playerData );
+			} );
+		}
+	} );
+});

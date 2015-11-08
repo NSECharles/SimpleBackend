@@ -19,10 +19,12 @@ public class Example : MonoBehaviour
 	void OnGUI()
 	{
 		GUI.Label( new Rect( 20, 20, 400, 50), "PlayerId: " + _PlayerId );
-		HelloButtonGUI();		
 		
+		HelloButtonGUI();	
 		NewPlayerButtonGUI();
-		
+		FightButtonGUI();
+		BuyPotionButtonGUI();
+
 		PlayerDataGUI();
 	}
 	
@@ -33,6 +35,7 @@ public class Example : MonoBehaviour
 			GUI.Label( new Rect( 20, 120, 400, 50), "Name: " + _PlayerData.Name );
 			GUI.Label( new Rect( 20, 150, 400, 50), "Health: " +  _PlayerData.Health );
 			GUI.Label( new Rect( 20, 180, 400, 50), "Coins: " +  _PlayerData.Coins );
+			GUI.Label( new Rect( 20, 210, 400, 50), "Kills: " +  _PlayerData.Kills );
 		}
 	}
 	
@@ -42,14 +45,7 @@ public class Example : MonoBehaviour
 		{
 			_Rester.GetJSON( ServerURL + "/hello", ( err, result ) =>
 			{
-				if ( !string.IsNullOrEmpty( err ) )
-				{
-					Debug.Log( "Error: " +  err );
-				}
-				else if ( result != null )
-				{
-					Debug.Log( (string)result["Hello"] );
-				}
+				Debug.Log( (string)result["Hello"] );
 			});
 		}			
 	}
@@ -60,34 +56,44 @@ public class Example : MonoBehaviour
 		{
 			_Rester.PostJSON( ServerURL + "/players", new JsonObject(), ( err, result ) =>
 			{
-				if ( !string.IsNullOrEmpty( err ) )
-				{
-					Debug.Log( "Error: " +  err );
-				}
-				else
-				{
-					_PlayerId =  (string)result[ "_id"];
-					PlayerPrefs.SetString( "PlayerId", _PlayerId );
-					Debug.Log("New player: " + _PlayerId );
-					
-					_PlayerData = new PlayerData( result );
-				}
+				_PlayerId =  (string)result[ "_id"];
+				PlayerPrefs.SetString( "PlayerId", _PlayerId );
+				Debug.Log("New player: " + _PlayerId );
+				
+				_PlayerData = new PlayerData( result );
 			} );
 		}		
 	}
 	
+	void FightButtonGUI()
+	{
+		if (GUI.Button(new Rect(280,60,100,50),"fight"))
+		{
+			_Rester.PostJSON( ServerURL + "/players/" + _PlayerId + "/fight", new JsonObject(), ( err, result ) =>
+			{	
+				_PlayerData = new PlayerData( result );
+			} );
+		}		
+	}	
+		
+	void BuyPotionButtonGUI()
+	{
+		if (GUI.Button(new Rect(410,60,100,50),"potion"))
+		{
+			_Rester.PostJSON( ServerURL + "/players/" + _PlayerId + "/buyPotion", new JsonObject(), ( err, result ) =>
+			{
+				_PlayerData = new PlayerData( result );
+			} );
+		}		
+	}	
+	
+	
+	
 	void LoadPlayerData( )
 	{
 		_Rester.GetJSON( ServerURL + "/players/" + _PlayerId, ( err, result ) =>
-		{
-			if ( !string.IsNullOrEmpty( err ) )
-			{
-				Debug.Log( "Error: " +  err );
-			}
-			else
-			{				
-				_PlayerData = new PlayerData( result );
-			}
+		{	
+			_PlayerData = new PlayerData( result );
 		} );
 	}
 	
@@ -104,10 +110,12 @@ public class Example : MonoBehaviour
 			Name = (string) inJSON[ "Name"];
 			Health = System.Convert.ToInt32( inJSON[ "Health"] );
 			Coins = System.Convert.ToInt32( inJSON[ "Coins"] );
+			Kills = System.Convert.ToInt32( inJSON[ "Kills"] );
 		}
 		public string Name;
 		public int Health;
 		public int Coins;
+		public int Kills;
 	}
 		
 }

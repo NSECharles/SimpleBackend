@@ -110,7 +110,12 @@ public class Rester : MonoBehaviour
 		{
 			err = "No Internet Connection!";
 		}
-
+		
+		if ( !string.IsNullOrEmpty( err ) )
+		{
+			Debug.Log( "Error: " +  err );
+		}
+		
 		inCallback( err, www );
 	}
 	
