@@ -2,12 +2,19 @@
 
 // EXPRESS INIT / HELLO WORLD
 var express = require( 'express');
+var bodyParser = require( 'body-parser');
 
 var app = express();
 
+// parse application/json
+app.use(bodyParser.json());
+
 app.get( '/hello', function( req,res ) 
 {
-	res.send("Hello World!");
+	console.log("Hello World!");
+	var obj = { Hello: "World "};
+
+	res.send( obj );
 });
 
 app.listen( process.env.PORT || 3000 );	
@@ -15,26 +22,41 @@ app.listen( process.env.PORT || 3000 );
 /// MONGO INIT
 var mongodb = require( 'mongodb');
 var mongo = mongodb.MongoClient;
-var db;
 
-var test = { foo : "bar", };
-
-mongo.connect( 'mongodb://localhost:27017/test', ( err, inDB ) =>
+mongo.connect( 'mongodb://localhost:27017/test', ( err, db ) =>
 {
-	db = inDB;
-	if ( !err )
+	if ( err )
 	{
-		console.log( 'connected!');
+		console.log( "err: " + err );
+		return;
 	}
-});
 
-
-// SAVESTUFF
-app.post( '/stuff', ( req, res ) =>
-{
-	var stuff = db.collection( 'stuff');
-	stuff.insert( req.body, ( err, data ) =>
+	// NEW PLAYER
+	app.post( '/players', ( req, res ) =>
 	{
-		// todo, res.send _id
-	} );
-});
+		var stuff = db.collection( 'players');
+
+		var newPlayer = 
+		{
+			Name : "player" + Math.ceil( Math.random() * 10000 ),
+			Health: 100,
+			Coins: 200
+		};
+
+		stuff.insertOne( newPlayer, ( err, result ) =>
+		{
+			if( err )
+			{
+				console.error( err );
+				return res.status( 500 ).send( err );
+			}
+			else
+			{
+				//console.log( JSON.stringify( result.ops, null, '  ' ) );
+				console.log( "new player with id: " +  result.insertedId );
+				var playerWithId = result.ops[0];
+				return res.send( playerWithId );
+			}
+		} );
+	});
+} );

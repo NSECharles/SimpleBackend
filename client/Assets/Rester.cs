@@ -6,7 +6,122 @@ using UnityEngine;
 
 public class Rester : MonoBehaviour
 {
-	public bool ShouldLogRequests;
+	public bool ShouldLog;
+	
+	
+	public void PostJSON( string inURL, JsonObject inJSON, Action< string, JsonObject > inCallback )
+	{
+		var headers = new Dictionary< string, string >();
+		headers[ "Content-Type" ] = "application/json";
+
+		var jsonString = SimpleJson.SimpleJson.SerializeObject( inJSON );
+		Post( inURL, System.Text.Encoding.UTF8.GetBytes( jsonString ), headers, ( string inError, WWW inWWW ) =>
+		{
+			if( inCallback != null )
+			{
+				JsonObject obj = null;
+				if ( string.IsNullOrEmpty( inError ) && ! string.IsNullOrEmpty( inWWW.text ) )
+				{
+					if ( ShouldLog )
+					{
+						Debug.Log("Response: " + inWWW.text );
+					}
+										
+					object parsedObj = null;
+					if ( SimpleJson.SimpleJson.TryDeserializeObject( inWWW.text, out parsedObj ) )
+					{
+						obj = ( JsonObject ) parsedObj; 
+					}
+				}
+				
+				inCallback( inError, obj ); 
+			}
+		} );
+	}
+
+
+	public void Post( string inURL, byte[] inData, Dictionary< string, string > inHeaders,  Action< string, WWW > inCallback )
+	{
+		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), inCallback ) );
+	}
+	
+	public void GetJSON( string inURL, Action< string, JsonObject > inCallback )
+	{
+		Get( inURL, ( string inError, WWW inWWW ) =>
+		{
+			if( inCallback != null )
+			{
+				JsonObject obj = null;
+				if ( string.IsNullOrEmpty( inError ) && ! string.IsNullOrEmpty( inWWW.text ) )
+				{
+					if ( ShouldLog )
+					{
+						Debug.Log("Response: " + inWWW.text );
+					}
+										
+					object parsedObj = null;
+					if ( SimpleJson.SimpleJson.TryDeserializeObject( inWWW.text, out parsedObj ) )
+					{
+						obj = ( JsonObject ) parsedObj; 
+					}
+				}
+				
+				inCallback( inError, obj ); 
+			}
+		} );
+	}
+	
+
+	public void Get( string inURL, Dictionary< string, string > inHeaders,  Action< string, WWW > inCallback )
+	{
+		StartCoroutine( DoRequest( new WWWFactory( inURL, null, inHeaders ), inCallback ) );
+	}
+	
+	public void Get( string inURL, Action< string, WWW > inCallback )
+	{
+		var headers = new Dictionary< string, string >();
+		StartCoroutine( DoRequest( new WWWFactory( inURL, null, headers ),( string inError,  WWW inWWW ) =>
+		{
+			if( inCallback != null ) { inCallback( inError, inWWW ); }
+		} ) );
+	}
+
+	private IEnumerator DoRequest( WWWFactory inWWWFactory, Action< string, WWW > inCallback )
+	{
+		string err = string.Empty;
+
+		WWW www = null;
+	
+		//Debug.Log ("Do PostRequest");
+		if( Application.internetReachability != NetworkReachability.NotReachable || inWWWFactory.IsLocal )
+		{
+			www = inWWWFactory.GetWWW( ShouldLog );
+			yield return www;
+			
+			if( !www.isDone )
+			{
+				err = "Can not connect";
+			}
+			else
+			{
+				err = www.error;
+
+				bool hasErr = !string.IsNullOrEmpty( err ) ;
+
+				if( hasErr && err.StartsWith( "304" ) )
+				{
+					err = string.Empty;
+				}
+			}
+		}
+		else
+		{
+			err = "No Internet Connection!";
+		}
+
+		inCallback( err, www );
+	}
+	
 	
 	private class WWWFactory
 	{
@@ -66,91 +181,5 @@ public class Rester : MonoBehaviour
 		private string _URL;
 		private byte[] _Data;
 		private Dictionary< string, string > _Headers;
-	}
-
-	public void Post( string inURL, JsonObject inJSON, Action< string, string > inCallback )
-	{
-		var headers = new Dictionary< string, string >();
-		headers[ "Content-Type" ] = "application/json";
-
-		Post( inURL, System.Text.Encoding.UTF8.GetBytes( inJSON.ToString() ), headers, inCallback );
-	}
-
-	public void Post( string inURL, JsonObject inJSON, Action< string, string, WWW > inCallback )
-	{
-		var headers = new Dictionary< string, string >();
-		headers[ "Content-Type" ] = "application/json";
-
-		Post( inURL, System.Text.Encoding.UTF8.GetBytes( inJSON.ToString() ), headers, inCallback );
-	}
-
-	public void Post( string inURL, WWWForm inForm,  Action< string, string > inCallback )
-	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inForm ), ( string inError, string inResult, WWW inWWW )=>
-		{
-			if( inCallback != null ) { inCallback( inError, inResult ); }
-		} ) );
-	}
-
-	public void Post( string inURL, byte[] inData, Dictionary< string, string > inHeaders,  Action< string, string > inCallback )
-	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), ( string inError, string inResult, WWW inWWW ) =>
-		{
-			if( inCallback != null ) { inCallback( inError, inResult ); }
-		} ) );
-	}
-
-	public void Post( string inURL, byte[] inData, Dictionary< string, string > inHeaders, Action< string, string, WWW > inCallback )
-	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), inCallback ) );
-	}
-
-	public void Get( string inURL, Dictionary< string, string > inHeaders,  Action< string, string, WWW > inCallback )
-	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, null, inHeaders ), inCallback ) );
-	}
-
-	private IEnumerator DoRequest( WWWFactory inWWWFactory, Action< string, string, WWW > inCallback )
-	{
-		string err = string.Empty;
-		string text = string.Empty;
-
-		WWW www = null;
-	
-		//Debug.Log ("Do PostRequest");
-		if( Application.internetReachability != NetworkReachability.NotReachable || inWWWFactory.IsLocal )
-		{
-			www = inWWWFactory.GetWWW( ShouldLogRequests );
-			yield return www;
-			
-			if( !www.isDone )
-			{
-				err = "Can not connect";
-				text = string.Empty;
-			}
-			else
-			{
-				err = www.error;
-
-				bool hasErr = !string.IsNullOrEmpty( err ) ;
-
-				if( hasErr && err.StartsWith( "304" ) )
-				{
-					err = string.Empty;
-					text = string.Empty;
-				}
-				else
-				{
-					text = !hasErr ? www.text : null;
-				}
-			}
-		}
-		else
-		{
-			err = "No Internet Connection!";
-			text = string.Empty;
-		}
-
-		inCallback( err, "", www );
 	}
 }
