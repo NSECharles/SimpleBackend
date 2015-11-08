@@ -20,7 +20,8 @@ var mongo = mongodb.MongoClient;
 var ObjectID = mongodb.ObjectID;
 
 var db;
-mongo.connect( 'mongodb://localhost:27017/test', ( err, inDB ) =>
+var dbURL = process.env.DBURL || 'mongodb://localhost:27017/test';
+mongo.connect( dbURL, ( err, inDB ) =>
 {
 	if ( err )
 	{
