@@ -6,3 +6,5 @@ client/Assembly-CSharp.csproj
 client/client-csharp.sln
 client/client.sln
 VSCode.meta
+client/Library
+client/Temp
