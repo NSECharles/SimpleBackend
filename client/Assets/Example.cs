@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using SimpleJson;
 
 public class Example : MonoBehaviour
 {	
-	// Use this for initialization
 	void Awake()
 	{
 		_Rester = gameObject.AddComponent< Rester >();
@@ -89,8 +87,6 @@ public class Example : MonoBehaviour
 		}		
 	}	
 	
-	
-	
 	void LoadPlayerData( )
 	{
 		_Rester.GetJSON( ServerURL + "/players/" + _PlayerId, ( err, result ) =>
@@ -100,7 +96,6 @@ public class Example : MonoBehaviour
 	}
 	
 	public string ServerURL;
-	
 	private string _PlayerId = "";
 	private Rester _Rester;
 	private PlayerData _PlayerData;
@@ -119,5 +114,4 @@ public class Example : MonoBehaviour
 		public int Coins;
 		public int Kills;
 	}
-		
 }
