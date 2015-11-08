@@ -16,12 +16,12 @@ app.get( '/hello', function( req,res )
 
 /// MONGO INIT
 var mongodb = require( 'mongodb');
-var mongo = mongodb.MongoClient;
+var MongoClient = mongodb.MongoClient;
 var ObjectID = mongodb.ObjectID;
 
 var db;
 var dbURL = process.env.DBURL || 'mongodb://localhost:27017/test';
-mongo.connect( dbURL, ( err, inDB ) =>
+MongoClient.connect( dbURL, ( err, inDB ) =>
 {
 	if ( err )
 	{
@@ -73,13 +73,12 @@ function dbGetPlayerData( playerId, callback )
 function dbSetPlayerData( playerId, playerData, callback )
 {
 	var players = db.collection( 'players');
-	players.update( { _id: ObjectID.createFromHexString( playerId ) }, playerData, callback );
+	players.updateOne( { _id: ObjectID.createFromHexString( playerId ) }, playerData, callback );
 }
 
 // LOAD PLAYER DATA
 app.get( '/players/:playerId', ( req, res ) => 
 {
-	console.log( req.params.playerId );
 	dbGetPlayerData( req.params.playerId, ( err, playerData ) =>
 	{
 		if ( playerData )
