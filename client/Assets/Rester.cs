@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class Rester : MonoBehaviour
 {
+	public bool ShouldLogRequests;
+	
 	private class WWWFactory
 	{
 		public WWWFactory( string inURL, WWWForm inForm )
@@ -84,7 +86,7 @@ public class Rester : MonoBehaviour
 
 	public void Post( string inURL, WWWForm inForm,  Action< string, string > inCallback )
 	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inForm ), inRequestType, ( string inError, string inResult, WWW inWWW )=>
+		StartCoroutine( DoRequest( new WWWFactory( inURL, inForm ), ( string inError, string inResult, WWW inWWW )=>
 		{
 			if( inCallback != null ) { inCallback( inError, inResult ); }
 		} ) );
@@ -92,7 +94,7 @@ public class Rester : MonoBehaviour
 
 	public void Post( string inURL, byte[] inData, Dictionary< string, string > inHeaders,  Action< string, string > inCallback )
 	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), inRequestType, ( string inError, string inResult, WWW inWWW ) =>
+		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), ( string inError, string inResult, WWW inWWW ) =>
 		{
 			if( inCallback != null ) { inCallback( inError, inResult ); }
 		} ) );
@@ -100,12 +102,12 @@ public class Rester : MonoBehaviour
 
 	public void Post( string inURL, byte[] inData, Dictionary< string, string > inHeaders, Action< string, string, WWW > inCallback )
 	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), inRequestType, inCallback ) );
+		StartCoroutine( DoRequest( new WWWFactory( inURL, inData, inHeaders ), inCallback ) );
 	}
 
 	public void Get( string inURL, Dictionary< string, string > inHeaders,  Action< string, string, WWW > inCallback )
 	{
-		StartCoroutine( DoRequest( new WWWFactory( inURL, null, inHeaders ), inRequestType, inCallback ) );
+		StartCoroutine( DoRequest( new WWWFactory( inURL, null, inHeaders ), inCallback ) );
 	}
 
 	private IEnumerator DoRequest( WWWFactory inWWWFactory, Action< string, string, WWW > inCallback )

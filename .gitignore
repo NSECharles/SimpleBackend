@@ -1,1 +1,8 @@
 node_modules
+client/Assembly-CSharp-Editor-vs.csproj
+client/Assembly-CSharp-Editor.csproj
+client/Assembly-CSharp-vs.csproj
+client/Assembly-CSharp.csproj
+client/client-csharp.sln
+client/client.sln
+VSCode.meta
